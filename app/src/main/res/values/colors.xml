@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <color name="colorPrimary">#3498db</color>
+    <color name="colorPrimaryDark">#2980b9</color>
+
+    <!-- Accent Color -->
+    <color name="colorAccent">#e74c3c</color>
+
+    <!-- Background Color -->
+    <color name="colorBackground">#ecf0f1</color>
+
+    <!-- Text Color -->
+    <color name="textColor">#2c3e50</color>
+
+    <!-- Task Completed Color -->
+    <color name="taskCompleted">#27ae60</color>
+
+    <!-- Task Priority Colors -->
+    <color name="highPriority">#e74c3c</color>
+    <color name="mediumPriority">#f39c12</color>
+    <color name="lowPriority">#2ecc71</color>
+
+    <!-- Category Colors -->
+    <color name="categoryWork">#3498db</color>
+    <color name="categoryPersonal">#e74c3c</color>
+    <color name="categoryShopping">#f39c12</color>
+
+    <!-- Highlight Color -->
+    <color name="highlightColor">#e67e22</color>
+
+    <!-- Additional Colors used in styles -->
+    <color name="colorOnPrimary">#ffffff</color>
+    <color name="colorSecondary">#3F51B5</color>
+    <color name="colorSecondaryVariant">#303F9F</color>
+    <color name="colorOnSecondary">#ffffff</color>
+
+    <color name="unselected_bottom_navigation_item_text">#FF4081</color>
+    <color name="selected_bottom_navigation_item_text">#27ae60</color>
+
+    <color name="description_color">#AE4A545E</color>
+</resources>

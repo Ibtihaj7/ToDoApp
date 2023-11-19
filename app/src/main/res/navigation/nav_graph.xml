@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/allTasksFragment">
+
+    <fragment
+        android:id="@+id/completedTasksFragment"
+        android:name="com.example.todoapp.ui.main.completedtask.CompletedTasksFragment"
+        android:label="fragment_completed_tasks"
+        tools:layout="@layout/fragment_completed_tasks" >
+        <action
+            android:id="@+id/action_completedTasksFragment_to_taskDescriptionFragment"
+            app:destination="@id/taskDescriptionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/allTasksFragment"
+        android:name="com.example.todoapp.ui.main.home.AllTasksFragment"
+        android:label="fragment_all_tasks"
+        tools:layout="@layout/fragment_all_tasks" >
+        <action
+            android:id="@+id/action_allTasksFragment_to_completedTasksFragment"
+            app:destination="@id/completedTasksFragment" />
+        <action
+            android:id="@+id/action_allTasksFragment_to_addNewTaskFragment"
+            app:destination="@id/addNewTaskFragment" />
+        <action
+            android:id="@+id/action_allTasksFragment_to_taskDescriptionFragment"
+            app:destination="@id/taskDescriptionFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/taskDescriptionFragment"
+        android:name="com.example.todoapp.ui.main.taskdescription.TaskDescriptionFragment"
+        android:label="fragment_task_description"
+        tools:layout="@layout/fragment_task_description" >
+        <argument
+            android:name="taskId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_taskDescriptionFragment_to_allTasksFragment"
+            app:destination="@id/allTasksFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addNewTaskFragment"
+        android:name="com.example.todoapp.ui.main.addnewtask.AddNewTaskFragment"
+        android:label="fragment_add_new_task"
+        tools:layout="@layout/fragment_add_new_task" >
+        <action
+            android:id="@+id/action_addNewTaskFragment_to_allTasksFragment"
+            app:destination="@id/allTasksFragment" />
+    </fragment>
+</navigation>
