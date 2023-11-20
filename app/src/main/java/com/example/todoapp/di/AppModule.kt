@@ -22,7 +22,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideDatabase(@ApplicationContext context: Context) =
+    fun provideDatabase(@ApplicationContext context: Context):MyRoomDatabase =
         Room.databaseBuilder(
             context,
             MyRoomDatabase::class.java,
@@ -31,13 +31,12 @@ object AppModule {
             .allowMainThreadQueries()
             .fallbackToDestructiveMigration()
             .build()
+
     @Provides
     fun provideDao(db: MyRoomDatabase) = db.taskDao()
 
     @Provides
-    fun provideDatabaseRepository(taskDao:TaskDAO): DatabaseRepository {
-        return DatabaseRepositoryImpl(taskDao)
-    }
+    fun provideDatabaseRepository(taskDao:TaskDAO): DatabaseRepository = DatabaseRepositoryImpl(taskDao)
 
     @Provides
     fun provideTasksRepository(dbRepo:DatabaseRepository): TasksRepository = TasksRepositoryImpl(dbRepo)

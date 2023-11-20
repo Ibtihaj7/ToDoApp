@@ -22,4 +22,8 @@ class AllTasksViewModel @Inject constructor(
             _tasksList.value = it
         }
     }
+
+    fun addTask(task: Task) = viewModelScope.launch {
+        dbRepository.insertNewTask(task)
+    }
 }

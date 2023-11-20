@@ -9,4 +9,10 @@ interface TasksRepository {
     fun getUrgentTasks():Flow<List<Task>>
     fun getOthersTasks():Flow<List<Task>>
     suspend fun getAllTasks():Flow<List<Task>>
+    fun addToUrgent(task: Task)
+    fun addToOthers(task: Task)
+    fun addToCompleted(task: Task)
+    fun removeFromCompleted(task: Task)
+    fun getTask(taskId: Int): Task?
+    suspend fun deleteTask(task: Task)
 }

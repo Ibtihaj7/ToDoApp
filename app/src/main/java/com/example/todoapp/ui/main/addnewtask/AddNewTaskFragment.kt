@@ -1,6 +1,5 @@
 package com.example.todoapp.ui.main.addnewtask
 
-import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,18 +8,25 @@ import android.view.ViewGroup
 import android.widget.DatePicker
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.example.todoapp.databinding.FragmentAddNewTaskBinding
+import com.example.todoapp.ui.main.MainViewModel
 import com.google.android.material.snackbar.Snackbar
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
-class AddNewTaskFragment : Fragment() {
+class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
+
     private lateinit var binding: FragmentAddNewTaskBinding
     private lateinit var datePickerDialog: DatePickerDialog
     private lateinit var navController: NavController
-    private val viewModel:AddNewTaskViewModel by viewModels()
+    private val viewModel: AddNewTaskViewModel by viewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,7 +40,6 @@ class AddNewTaskFragment : Fragment() {
     }
 
     private fun setupUI() {
-        initDatePicker()
         binding.datePickerButton.setOnClickListener { openDatePicker() }
         binding.addTaskButton.setOnClickListener { addNewTask() }
 
@@ -43,26 +48,35 @@ class AddNewTaskFragment : Fragment() {
     }
 
     private fun addNewTask() {
-        val titleEditText = binding.titleEditText
-        val descriptionEditText = binding.descriptionEditText
-        val urgentSwitch = binding.urgentSwitch
-        val datePickerButton = binding.datePickerButton
+        val title = binding.titleEditText.text.toString().trim()
+        val description = binding.descriptionEditText.text.toString().trim()
+        val isUrgent = binding.urgentSwitch.isChecked
+        val selectedDateString = binding.datePickerButton.text.toString().trim()
 
-        val title = titleEditText.text.toString().trim()
-        val description = descriptionEditText.text.toString().trim()
-        val isUrgent = urgentSwitch.isChecked
-        val selectedDate = datePickerButton.text.toString().trim()
-
-        val isValid = viewModel.validateInput(title,description,selectedDate)
+        val isValid = validateInput(title, description, selectedDateString)
 
         if (isValid) {
-            viewModel.addNewTask(title, description, isUrgent,selectedDate)
+            val selectedDate = convertStringToDate(selectedDateString)
+            mainViewModel.addNewTask(title, description, isUrgent, selectedDate)
             showTaskAddedSnackBar()
             navigateToAllTasksFragment()
         } else {
-            handleValidationErrors(title, description,selectedDate)
+            handleValidationErrors(title, description, selectedDateString)
         }
     }
+    private fun convertStringToDate(dateString: String): Date {
+        val format = SimpleDateFormat("MMM d yyyy", Locale.getDefault())
+        return try {
+            format.parse(dateString) ?: Date()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Date()
+        }
+    }
+
+    private fun validateInput(title: String, description: String, selectedDate: String) =
+        !(title.isEmpty() || description.isEmpty() || selectedDate.isEmpty())
+
     private fun showTaskAddedSnackBar() {
         Snackbar.make(
             binding.root,
@@ -77,8 +91,9 @@ class AddNewTaskFragment : Fragment() {
         selectedDate: String
     ) {
         binding.titleInputLayout.error = if (title.isEmpty()) ERROR_TITLE_REQUIRED else null
-        binding.descriptionInputLayout.error = if (description.isEmpty()) ERROR_DESCRIPTION_REQUIRED else null
-        binding.dueDateErrorTextView.visibility = if(selectedDate.isEmpty()) View.VISIBLE else View.GONE
+        binding.descriptionInputLayout.error =
+            if (description.isEmpty()) ERROR_DESCRIPTION_REQUIRED else null
+        binding.dueDateErrorTextView.visibility = if (selectedDate.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun setupToolbar(toolbar: Toolbar) {
@@ -92,30 +107,27 @@ class AddNewTaskFragment : Fragment() {
         navController.navigate(action)
     }
 
-    private fun initDatePicker() {
-        val dateSetListener =
-            DatePickerDialog.OnDateSetListener { _: DatePicker, year: Int, month: Int, day: Int ->
-                val formattedDate = makeDateString(day, month + 1, year)
-                binding.datePickerButton.text = formattedDate
-            }
-
-        val cal = Calendar.getInstance()
-        val year = cal.get(Calendar.YEAR)
-        val month = cal.get(Calendar.MONTH)
-        val day = cal.get(Calendar.DAY_OF_MONTH)
-
-        val style = AlertDialog.THEME_HOLO_LIGHT
-
-        datePickerDialog =
-            DatePickerDialog(requireContext(), style, dateSetListener, year, month, day)
-    }
-
     private fun makeDateString(day: Int, month: Int, year: Int): String {
         return "${Month.values()[month - 1].abbreviation} $day $year"
     }
 
     private fun openDatePicker() {
+        val calendar = Calendar.getInstance()
+
+        datePickerDialog = DatePickerDialog(
+            requireContext(),
+            this,
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+
         datePickerDialog.show()
+    }
+
+    override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
+        val selectedDate = makeDateString(dayOfMonth, month + 1, year)
+        binding.datePickerButton.text = selectedDate
     }
 
     enum class Month(val abbreviation: String) {
@@ -136,6 +148,6 @@ class AddNewTaskFragment : Fragment() {
     companion object {
         const val ERROR_TITLE_REQUIRED = "Title is required"
         const val ERROR_DESCRIPTION_REQUIRED = "Description is required"
-        const val SUCCESSFULLY_TASK_ADDED ="Task added successfully"
+        const val SUCCESSFULLY_TASK_ADDED = "Task added successfully"
     }
 }

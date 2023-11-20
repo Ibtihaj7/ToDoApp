@@ -3,7 +3,9 @@ package com.example.todoapp.ui.main
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -19,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var bottomNavigationView: BottomNavigationView
+    private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +33,8 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
         bottomNavigationView = binding.bottomNavigationView
         bottomNavigationView.setupWithNavController(navController)
+
+        mainViewModel.initData()
 
         setupBottomNavigationViewVisibility()
 //        setDefaultLocale()

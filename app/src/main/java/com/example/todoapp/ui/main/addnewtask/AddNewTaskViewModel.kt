@@ -1,13 +1,18 @@
 package com.example.todoapp.ui.main.addnewtask
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.todoapp.model.Task
+import com.example.todoapp.repo.tasks.TasksRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import java.util.Date
+import javax.inject.Inject
 
-class AddNewTaskViewModel:ViewModel() {
-    fun validateInput(title: String, description: String,  selectedDate: String) =
-         !(title.isEmpty() || description.isEmpty() || selectedDate.isEmpty())
+@HiltViewModel
+class AddNewTaskViewModel @Inject constructor(
+    private val tasksRepo:TasksRepository
+):ViewModel() {
 
-    fun addNewTask(title: String, description: String, urgent: Boolean, selectedDate: String) {
-
-    }
 
 }

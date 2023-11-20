@@ -12,22 +12,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todoapp.R
 import com.example.todoapp.databinding.FragmentAllTasksBinding
 import com.example.todoapp.model.Task
-import com.example.todoapp.model.TaskSection
+import com.example.todoapp.model.TaskType
 import com.example.todoapp.ui.main.CompletedChangeListener
 import com.example.todoapp.ui.main.MainViewModel
 import com.example.todoapp.ui.main.PostDetailListener
-import com.example.todoapp.ui.main.adapter.section.SectionInnerItemAdapter
+import com.example.todoapp.ui.main.adapter.TaskAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Date
 
 @AndroidEntryPoint
 class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener {
-
     private val viewModel: AllTasksViewModel by viewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var navController: NavController
     private lateinit var binding: FragmentAllTasksBinding
-    private val taskSection: MutableList<TaskSection> = mutableListOf<TaskSection>()
+    private lateinit var tasksAdapter:TaskAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,18 +36,30 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
         navController = findNavController()
         setHasOptionsMenu(true)
 
+        val task1 = Task(0, "abrar", "adham", Date(), true, isCompleted = true)
+//        val job = viewModel.addTask(task1)
+
         initUI()
-        initData()
         observeTasksList()
 
         return binding.root
     }
 
     private fun initUI() {
-        val sectionAdapter = SectionInnerItemAdapter(this, this)
-        sectionAdapter.updateData(taskSection)
+        tasksAdapter = TaskAdapter(this, this)
         binding.tasksRv.layoutManager = LinearLayoutManager(requireContext())
-        binding.tasksRv.adapter = sectionAdapter
+        binding.tasksRv.adapter = tasksAdapter
+
+        val title1 = TaskType.ARGENT
+        val title2 = TaskType.OTHERS
+
+        // Create a list of TaskItem objects
+        val taskItems = listOf(
+            TaskAdapter.TaskItem.Title(title1)
+        )
+
+        // Update the adapter with the list of TaskItem objects
+        tasksAdapter.updateData(taskItems)
 
         binding.addTaskFloatingButton.setOnClickListener {
             val action = AllTasksFragmentDirections.actionAllTasksFragmentToAddNewTaskFragment()
@@ -56,37 +67,38 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
         }
     }
 
-    private fun observeTasksList() {
 
+    private fun observeTasksList() {
+        mainViewModel.tasksList.observe(viewLifecycleOwner) { taskItems ->
+            taskItems?.let {
+                if (::tasksAdapter.isInitialized) {
+                    val filteredList = filterTasks(taskItems)
+                    tasksAdapter.updateData(filteredList)
+                }
+            }
+        }
     }
 
-    private fun initData(){
-        val task1 = Task(0,"ibtihaj","adham", Date(),false,isCompleted =false)
-        val task2 = Task(1,"abrar","hannon", Date(),true,isCompleted =false)
-        val task3 = Task(2,"aya","ahmad", Date(),false,isCompleted =false)
-        val task4 = Task(3,"omar","yaseen", Date(),true,isCompleted =false)
-        val task5 = Task(4,"ali","adam", Date(),true,isCompleted =false)
-        val task6 = Task(5,"zaid","amer", Date(),false,isCompleted =false)
-        val task7 = Task(6,"weam","ali", Date(),true,isCompleted =true)
-        val task8 = Task(7,"amaar","alyaser", Date(),false,isCompleted =true)
-        val task9 = Task(8,"hummam","ahmad", Date(),false,isCompleted =true)
-        val task10 = Task(9,"mahmoud","hasan", Date(),false, isCompleted = true)
+    private fun filterTasks(taskItems: List<TaskAdapter.TaskItem>): List<TaskAdapter.TaskItem> {
+        val filteredList = mutableListOf<TaskAdapter.TaskItem>()
 
-        val tasks:ArrayList<Task> = arrayListOf()
-        tasks.add(task1)
-        tasks.add(task2)
-        tasks.add(task5)
+        // Filter urgent tasks and add title
+        val urgentTasks = taskItems.filterIsInstance<TaskAdapter.TaskItem.Task>()
+            .filter { it.task.urgent }
+        if (urgentTasks.isNotEmpty()) {
+            filteredList.add(TaskAdapter.TaskItem.Title(TaskType.ARGENT))
+            filteredList.addAll(urgentTasks)
+        }
 
-        val tasks2:ArrayList<Task> = arrayListOf()
-        tasks2.add(task6)
-        tasks2.add(task8)
-        tasks2.add(task9)
+        // Filter others tasks and add title
+        val othersTasks = taskItems.filterIsInstance<TaskAdapter.TaskItem.Task>()
+            .filter { !it.task.urgent }
+        if (othersTasks.isNotEmpty()) {
+            filteredList.add(TaskAdapter.TaskItem.Title(TaskType.OTHERS))
+            filteredList.addAll(othersTasks)
+        }
 
-
-        taskSection.add(TaskSection("urgent",tasks))
-        taskSection.add(TaskSection("others",tasks2))
-
-        Log.d("main",taskSection.toString())
+        return filteredList
     }
 
     private fun onFilterTasksClicked() {
@@ -94,6 +106,7 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
     }
 
     override fun onCompletedChanged(task: Task) {
+        mainViewModel.onCompletedChanged(task)
         Log.d("main", "onCompletedChanged")
     }
 
@@ -109,12 +122,13 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
+        Log.d("main", "onOptionsItemSelected")
+        return when (item.itemId) {
             R.id.filterTasks -> {
                 onFilterTasksClicked()
-                return true
+                true
             }
-            else -> return super.onOptionsItemSelected(item)
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }

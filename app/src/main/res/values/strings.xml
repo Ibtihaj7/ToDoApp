@@ -20,5 +20,6 @@
     <string name="due_date_error">Please select a due date</string>
     <string name="add_task_button">Add Task</string>
     <string name="date_picker_text">JAN 01, 2020</string>
+    <string name="complete_button_title">Complete</string>
 
 </resources>
