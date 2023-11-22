@@ -56,7 +56,7 @@
     </fragment>
     <dialog
         android:id="@+id/buttomSheetFragment"
-        android:name="com.example.todoapp.ui.main.BottomSheetFragment"
+        android:name="com.example.todoapp.ui.main.bottomsheet.BottomSheetFragment"
         android:label="fragment_buttom_sheet"
         tools:layout="@layout/fragment_buttom_sheet" >
         <action

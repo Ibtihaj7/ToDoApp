@@ -17,11 +17,13 @@ import com.example.todoapp.databinding.FragmentAddNewTaskBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.ui.main.MainViewModel
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+@AndroidEntryPoint
 class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     private lateinit var binding: FragmentAddNewTaskBinding
     private lateinit var datePickerDialog: DatePickerDialog
@@ -94,8 +96,7 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         selectedDate: String
     ) {
         binding.titleInputLayout.error = if (title.isEmpty()) getTitleRequiredError(context) else null
-        binding.descriptionInputLayout.error =
-            if (description.isEmpty()) getDescriptionRequiredError(context) else null
+        binding.descriptionInputLayout.error = if (description.isEmpty()) getDescriptionRequiredError(context) else null
         binding.dueDateErrorTextView.visibility = if (selectedDate.isEmpty()) View.VISIBLE else View.GONE
     }
 
@@ -149,8 +150,8 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     }
 
     companion object {
-        fun getTitleRequiredError(context: Context) =  context.getString(R.string.error_title_required)
-        fun getDescriptionRequiredError(context: Context) = context.getString(R.string.error_description_required)
-        fun getTaskAddedSuccessfully(context: Context) = context.getString(R.string.successfully_task_added)
+        private fun getTitleRequiredError(context: Context) =  context.getString(R.string.error_title_required)
+        private fun getDescriptionRequiredError(context: Context) = context.getString(R.string.error_description_required)
+        private fun getTaskAddedSuccessfully(context: Context) = context.getString(R.string.successfully_task_added)
     }
 }

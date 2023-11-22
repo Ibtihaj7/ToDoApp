@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
@@ -51,13 +52,13 @@ class MainViewModel @Inject constructor(
         tasksRepo.updateTask(taskCopy)
     }
 
-    fun getTask(taskId: Int): Task? {
-        return _tasksList.value?.mapNotNull {
+    fun getTaskById(taskId: Int): Task {
+        return _tasksList.value!!.map {
             when (it) {
                 is TaskAdapter.TaskItem.Task -> it.task
-                else -> null
+                else -> Task(0,"","", Date())
             }
-        }?.firstOrNull { it.id == taskId }
+        }.first { it.id == taskId }
     }
 
     fun deleteTask(task: Task)=viewModelScope.launch {
@@ -69,6 +70,7 @@ class MainViewModel @Inject constructor(
         val tasksItem = tasks.map { TaskAdapter.TaskItem.Task(it) }
         _tasksList.value = tasksItem
     }
+
     fun getTasksWithDueDatePassed()= viewModelScope.launch {
         val tasks = tasksRepo.getTasksWithDueDatePassed()
         val tasksItem = tasks.map { TaskAdapter.TaskItem.Task(it) }
@@ -91,5 +93,4 @@ class MainViewModel @Inject constructor(
                 .collect()
         }
     }
-
 }

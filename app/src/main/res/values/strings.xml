@@ -36,5 +36,9 @@
     <string name="upcoming_text">Upcoming</string>
     <string name="past_due_text">Past Due</string>
     <string name="all_tasks_text">All Tasks</string>
+    <string name="successfully_task_deleted">Task deleted successfully</string>
+    <string name="successfully_task_completed">The task is marked as completed</string>
+    <string name="task_type_argent">Argent</string>
+    <string name="task_type_others">Others</string>
 
 </resources>

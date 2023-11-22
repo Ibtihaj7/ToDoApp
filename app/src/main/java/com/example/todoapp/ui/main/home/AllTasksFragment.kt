@@ -3,7 +3,6 @@ package com.example.todoapp.ui.main.home
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -15,6 +14,7 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -27,12 +27,14 @@ import com.example.todoapp.R
 import com.example.todoapp.databinding.FragmentAllTasksBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.model.TaskType
-import com.example.todoapp.ui.main.BottomSheetFragment
 import com.example.todoapp.ui.main.CompletedChangeListener
 import com.example.todoapp.ui.main.MainViewModel
 import com.example.todoapp.ui.main.PostDetailListener
 import com.example.todoapp.ui.main.adapter.TaskAdapter
+import com.example.todoapp.utils.Constant.ALL_TASKS_KEY
 import com.example.todoapp.utils.Constant.DATASTORE_NAME
+import com.example.todoapp.utils.Constant.PAST_DUE_KEY
+import com.example.todoapp.utils.Constant.UPCOMING_KEY
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -44,8 +46,8 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
     private lateinit var navController: NavController
     private lateinit var binding: FragmentAllTasksBinding
     private lateinit var tasksAdapter: TaskAdapter
-    private var handler: Handler? = null
     private val Context.datastore: DataStore<Preferences> by preferencesDataStore(DATASTORE_NAME)
+    private var handler: Handler? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,7 +56,7 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
         binding = FragmentAllTasksBinding.inflate(inflater)
         navController = findNavController()
 
-//        mm()
+//        initializeFiltersBasedOnPreferences()
         initializeViews()
         initializeAppBar()
         observeTasksList()
@@ -62,17 +64,15 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
         return binding.root
     }
 
-    private fun mm() = lifecycleScope.launch(Dispatchers.Main){
+    private fun initializeFiltersBasedOnPreferences() = lifecycleScope.launch(Dispatchers.Main){
         val preferences = requireContext().datastore.data.first()
 
-        val upcomingChecked = preferences[BottomSheetFragment.UPCOMING_KEY] ?: false
-        val pastDueChecked = preferences[BottomSheetFragment.PAST_DUE_KEY] ?: false
-        val allTasksChecked = preferences[BottomSheetFragment.ALL_TASKS_KEY] ?: false
+        val upcomingChecked = preferences[UPCOMING_KEY] ?: false
+        val pastDueChecked = preferences[PAST_DUE_KEY] ?: false
+        val allTasksChecked = preferences[ALL_TASKS_KEY] ?: false
 
         if(upcomingChecked) mainViewModel.getTasksWithDueDateUpcoming()
-
         if(pastDueChecked) mainViewModel.getTasksWithDueDatePassed()
-
         if(allTasksChecked) mainViewModel.initData()
     }
 
@@ -121,7 +121,6 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
             filteredList.add(TaskAdapter.TaskItem.Title(TaskType.OTHERS))
             filteredList.addAll(othersTasks)
         }
-
         return filteredList
     }
 
@@ -135,7 +134,7 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
 
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.toolbar,menu)
+
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -148,7 +147,10 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
                 }
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+//        setupSearchViewListener()
+    }
 
+    private fun setupSearchViewListener() {
         val searchItem = binding.toolbar.menu.findItem(R.id.searchTask)
         val searchView = searchItem?.actionView as SearchView
 
@@ -158,8 +160,6 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                handler?.removeCallbacksAndMessages(null)
-                handler = Handler(Looper.getMainLooper())
                 handler?.postDelayed({ filterTasksBySearch(newText) }, FILTER_DELAY)
                 return true
             }
@@ -168,6 +168,13 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
 
     private fun filterTasksBySearch(query: String?) {
         mainViewModel.filterList(query)
+        lifecycleScope.launch {
+            requireContext().datastore.edit { preferences ->
+                preferences[UPCOMING_KEY] = false
+                preferences[PAST_DUE_KEY] = false
+                preferences[ALL_TASKS_KEY] = false
+            }
+        }
     }
 
     private fun onFilterTasksClicked() {
@@ -182,6 +189,11 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
     override fun onCardViewClicked(task: Task) {
         val action = AllTasksFragmentDirections.actionAllTasksFragmentToTaskDescriptionFragment(task.id)
         navController.navigate(action)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        handler?.removeCallbacksAndMessages(null)
     }
 
     companion object {

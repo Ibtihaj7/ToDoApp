@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="15dp"
-        tools:context=".ui.main.BottomSheetFragment">
+        tools:context=".ui.main.bottomsheet.BottomSheetFragment">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -1,5 +1,6 @@
 package com.example.todoapp.ui.main.taskdescription
 
+import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,6 +26,7 @@ class TaskDescriptionFragment : Fragment() {
     private lateinit var binding:FragmentTaskDescriptionBinding
     private val args: TaskDescriptionFragmentArgs by navArgs()
     private lateinit var navController: NavController
+    private lateinit var context: Context
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,15 +36,15 @@ class TaskDescriptionFragment : Fragment() {
 
         setNavigationOnClickListener()
         val taskId = args.taskId
-        val task = mainViewModel.getTask(taskId)
-        if (task != null) {
-            if(task.isCompleted){
-                binding.materialDivider.visibility = View.GONE
-                binding.completeBtn.visibility = View.GONE
-            }
-            binding.urgentImageView.visibility = if(!task.urgent) View.GONE else View.VISIBLE
+        val task = mainViewModel.getTaskById(taskId)
+        context = requireContext()
 
+        if(task.isCompleted){
+            binding.materialDivider.visibility = View.GONE
+            binding.completeBtn.visibility = View.GONE
         }
+        binding.urgentImageView.visibility = if(!task.urgent) View.GONE else View.VISIBLE
+
         navController = findNavController()
 
         setDeleteTask(task!!)
@@ -55,7 +57,7 @@ class TaskDescriptionFragment : Fragment() {
     private fun setCompletedTask(task: Task) {
         binding.completeBtn.setOnClickListener {
             mainViewModel.onCompletedChanged(task)
-            showTaskAddedSnackBar(SUCCESSFULLY_TASK_COMPLETED)
+            showTaskAddedSnackBar(getSuccessfullyTaskCompleted(context))
             navigateToAllTasksFragment()
         }
     }
@@ -71,7 +73,7 @@ class TaskDescriptionFragment : Fragment() {
 
             dialog.getButton(DialogInterface.BUTTON_POSITIVE)?.setOnClickListener {
                 mainViewModel.deleteTask(task)
-                showTaskAddedSnackBar(SUCCESSFULLY_TASK_DELETED)
+                showTaskAddedSnackBar(getSuccessfullyTaskAdded(context))
                 navigateToAllTasksFragment()
                 dialog.cancel()
             }
@@ -101,7 +103,7 @@ class TaskDescriptionFragment : Fragment() {
     }
 
     companion object{
-        private const val SUCCESSFULLY_TASK_DELETED = "Task deleted successfully"
-        private const val SUCCESSFULLY_TASK_COMPLETED = "The task is marked as completed"
+        private fun getSuccessfullyTaskAdded(context: Context) =  context.getString(R.string.successfully_task_deleted)
+        private fun getSuccessfullyTaskCompleted(context: Context) = context.getString(R.string.successfully_task_completed)
     }
 }

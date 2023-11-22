@@ -29,9 +29,10 @@ class CompletedTasksFragment : Fragment() ,CompletedChangeListener,PostDetailLis
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentCompletedTasksBinding.inflate(inflater)
-        initUI()
 
+        initUI()
         observeTasksList()
+
         return binding.root
     }
 

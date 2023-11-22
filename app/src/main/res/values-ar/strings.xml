@@ -37,5 +37,8 @@
     <string name="upcoming_text">اقترب موعد استحقاقها</string>
     <string name="past_due_text">فات موعد استحقاقها</string>
     <string name="all_tasks_text">كل المهمات</string>
-
+    <string name="successfully_task_deleted">تم حذف المهمة بنجاح</string>
+    <string name="successfully_task_completed">تم تعيين المهمة كمكتملة</string>
+    <string name="task_type_argent">عاجل</string>
+    <string name="task_type_others">أخرى</string>
 </resources>

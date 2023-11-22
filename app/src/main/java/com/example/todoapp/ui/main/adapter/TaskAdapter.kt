@@ -10,7 +10,6 @@ import com.example.todoapp.databinding.CustomeTasksTitleBinding
 import com.example.todoapp.model.TaskType
 import com.example.todoapp.ui.main.CompletedChangeListener
 import com.example.todoapp.ui.main.PostDetailListener
-import java.lang.IllegalArgumentException
 
 class TaskAdapter(
     private val completedChangeListener: CompletedChangeListener,
@@ -25,12 +24,12 @@ class TaskAdapter(
             TASKS_VIEW -> {
                 val layoutInflater = LayoutInflater.from(parent.context)
                 val binding = CustomeTaskBinding.inflate(layoutInflater, parent, false)
-                return TaskViewHolder(binding, completedChangeListener, postDetailListener)
+                TaskViewHolder(binding, completedChangeListener, postDetailListener)
             }
             TITLES_VIEW -> {
                 val layoutInflater = LayoutInflater.from(parent.context)
                 val binding = CustomeTasksTitleBinding.inflate(layoutInflater, parent, false)
-                return TitleViewHolder(binding)
+                TitleViewHolder(binding)
             }
             else -> throw IllegalArgumentException("Invalid item type")
         }
@@ -66,6 +65,7 @@ class TaskAdapter(
                 else -> false
             }
         }
+
         override fun areContentsTheSame(oldItem: TaskItem, newItem: TaskItem): Boolean {
             return oldItem == newItem
         }
