@@ -6,5 +6,9 @@ import kotlinx.coroutines.flow.Flow
 interface DatabaseRepository {
     suspend fun insertNewTask(task: Task)
     suspend fun deleteTask(task: Task)
-    suspend fun getAllTasks(): Flow<List<Task>>
+    fun getAllTasks(): Flow<List<Task>>
+    fun getCompletedTasks():Flow<List<Task>>
+    suspend fun updateTask(task: Task)
+    fun getTasksWithDueDateUpcoming(): List<Task>
+    fun getTasksWithDueDatePassed(): List<Task>
 }

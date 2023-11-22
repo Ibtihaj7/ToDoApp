@@ -11,13 +11,13 @@ import com.example.todoapp.model.TaskType
 import com.example.todoapp.ui.main.CompletedChangeListener
 import com.example.todoapp.ui.main.PostDetailListener
 import java.lang.IllegalArgumentException
+
 class TaskAdapter(
     private val completedChangeListener: CompletedChangeListener,
     private val postDetailListener: PostDetailListener
 ) : ListAdapter<TaskAdapter.TaskItem, RecyclerView.ViewHolder>(DiffCallback()) {
-
-    fun <T : Any> updateData(newTasks: List<T>) {
-        submitList(newTasks as List<TaskItem>)
+    fun updateData(newTasks: List<TaskItem>) {
+        submitList(newTasks)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -50,16 +50,10 @@ class TaskAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        val item = getItem(position)
-        return when (item) {
+        return when (getItem(position)) {
             is TaskItem.Task -> TASKS_VIEW
             is TaskItem.Title -> TITLES_VIEW
         }
-    }
-
-    sealed class TaskItem {
-        data class Task(val task: com.example.todoapp.model.Task) : TaskItem()
-        data class Title(val title: TaskType) : TaskItem()
     }
 
     class DiffCallback : DiffUtil.ItemCallback<TaskItem>() {
@@ -73,14 +67,13 @@ class TaskAdapter(
             }
         }
         override fun areContentsTheSame(oldItem: TaskItem, newItem: TaskItem): Boolean {
-            return when {
-                oldItem is TaskItem.Task && newItem is TaskItem.Task ->
-                    oldItem == newItem
-                oldItem is TaskItem.Title && newItem is TaskItem.Title ->
-                    oldItem == newItem
-                else -> false
-            }
+            return oldItem == newItem
         }
+    }
+
+    sealed class TaskItem {
+        data class Task(val task: com.example.todoapp.model.Task) : TaskItem()
+        data class Title(val title: TaskType) : TaskItem()
     }
 
     companion object {

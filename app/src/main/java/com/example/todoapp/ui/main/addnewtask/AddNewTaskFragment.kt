@@ -1,6 +1,7 @@
 package com.example.todoapp.ui.main.addnewtask
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +10,11 @@ import android.widget.DatePicker
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.example.todoapp.R
 import com.example.todoapp.databinding.FragmentAddNewTaskBinding
+import com.example.todoapp.model.Task
 import com.example.todoapp.ui.main.MainViewModel
 import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
@@ -21,12 +23,11 @@ import java.util.Date
 import java.util.Locale
 
 class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
-
     private lateinit var binding: FragmentAddNewTaskBinding
     private lateinit var datePickerDialog: DatePickerDialog
     private lateinit var navController: NavController
-    private val viewModel: AddNewTaskViewModel by viewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
+    private lateinit var context: Context
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,6 +35,7 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     ): View {
         binding = FragmentAddNewTaskBinding.inflate(inflater, container, false)
         navController = findNavController()
+        context = requireContext()
 
         setupUI()
         return binding.root
@@ -56,18 +58,19 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         val isValid = validateInput(title, description, selectedDateString)
 
         if (isValid) {
-            val selectedDate = convertStringToDate(selectedDateString)
-            mainViewModel.addNewTask(title, description, isUrgent, selectedDate)
+            val selectedDate = selectedDateString.toDate()
+            val newTask = Task(0,title,description,selectedDate,isUrgent)
+            mainViewModel.addNewTask(newTask)
             showTaskAddedSnackBar()
             navigateToAllTasksFragment()
         } else {
             handleValidationErrors(title, description, selectedDateString)
         }
     }
-    private fun convertStringToDate(dateString: String): Date {
+    private fun String.toDate(): Date {
         val format = SimpleDateFormat("MMM d yyyy", Locale.getDefault())
         return try {
-            format.parse(dateString) ?: Date()
+            format.parse(this) ?: Date()
         } catch (e: Exception) {
             e.printStackTrace()
             Date()
@@ -80,7 +83,7 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     private fun showTaskAddedSnackBar() {
         Snackbar.make(
             binding.root,
-            SUCCESSFULLY_TASK_ADDED,
+            getTaskAddedSuccessfully(context),
             Snackbar.LENGTH_SHORT
         ).show()
     }
@@ -90,9 +93,9 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         description: String,
         selectedDate: String
     ) {
-        binding.titleInputLayout.error = if (title.isEmpty()) ERROR_TITLE_REQUIRED else null
+        binding.titleInputLayout.error = if (title.isEmpty()) getTitleRequiredError(context) else null
         binding.descriptionInputLayout.error =
-            if (description.isEmpty()) ERROR_DESCRIPTION_REQUIRED else null
+            if (description.isEmpty()) getDescriptionRequiredError(context) else null
         binding.dueDateErrorTextView.visibility = if (selectedDate.isEmpty()) View.VISIBLE else View.GONE
     }
 
@@ -146,8 +149,8 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     }
 
     companion object {
-        const val ERROR_TITLE_REQUIRED = "Title is required"
-        const val ERROR_DESCRIPTION_REQUIRED = "Description is required"
-        const val SUCCESSFULLY_TASK_ADDED = "Task added successfully"
+        fun getTitleRequiredError(context: Context) =  context.getString(R.string.error_title_required)
+        fun getDescriptionRequiredError(context: Context) = context.getString(R.string.error_description_required)
+        fun getTaskAddedSuccessfully(context: Context) = context.getString(R.string.successfully_task_added)
     }
 }

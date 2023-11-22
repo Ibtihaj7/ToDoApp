@@ -25,62 +25,94 @@
             app:navigationIcon="@drawable/back"/>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/materialCardView"
+            android:id="@+id/titleCardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="24dp"
             app:cardBackgroundColor="#FFFFFF"
             app:cardCornerRadius="5dp"
             app:cardElevation="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            app:strokeColor="@color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:padding="5dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/task_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/task_title_hint"
+                    android:text="@{task.title}"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/urgentImageView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_urgent" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/materialCardView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/materialDivider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/titleCardView"
             app:strokeColor="@color/white"
             app:strokeWidth="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/task_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@{task.title}"
-                    android:hint="@string/task_title_hint"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/task_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@{task.description}"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="25dp"
+                    android:layout_marginEnd="24dp"
                     android:hint="@string/task_description_hint"
+                    android:text="@{task.description}"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/task_due_date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@{task.dueDate.toString()}"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="25dp"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginBottom="24dp"
                     android:hint="@string/task_due_date_hint"
+                    android:text="@{task.dueDate.toString()}"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
-
-                <com.google.android.material.checkbox.MaterialCheckBox
-                    android:id="@+id/task_urgent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:buttonTint="#F44336"
-                    android:checked="@{task.urgent}"
-                    android:text="@string/urgent_checkbox_text"
-                    android:enabled="false" />
             </LinearLayout>
+
 
         </com.google.android.material.card.MaterialCardView>
 

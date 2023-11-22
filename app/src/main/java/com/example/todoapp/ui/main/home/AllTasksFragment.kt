@@ -1,11 +1,25 @@
 package com.example.todoapp.ui.main.home
 
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
-import android.view.*
+import android.os.Handler
+import android.os.Looper
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.SearchView
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,67 +27,79 @@ import com.example.todoapp.R
 import com.example.todoapp.databinding.FragmentAllTasksBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.model.TaskType
+import com.example.todoapp.ui.main.BottomSheetFragment
 import com.example.todoapp.ui.main.CompletedChangeListener
 import com.example.todoapp.ui.main.MainViewModel
 import com.example.todoapp.ui.main.PostDetailListener
 import com.example.todoapp.ui.main.adapter.TaskAdapter
+import com.example.todoapp.utils.Constant.DATASTORE_NAME
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Date
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener {
-    private val viewModel: AllTasksViewModel by viewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var navController: NavController
     private lateinit var binding: FragmentAllTasksBinding
-    private lateinit var tasksAdapter:TaskAdapter
+    private lateinit var tasksAdapter: TaskAdapter
+    private var handler: Handler? = null
+    private val Context.datastore: DataStore<Preferences> by preferencesDataStore(DATASTORE_NAME)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentAllTasksBinding.inflate(inflater)
         navController = findNavController()
-        setHasOptionsMenu(true)
 
-        val task1 = Task(0, "abrar", "adham", Date(), true, isCompleted = true)
-//        val job = viewModel.addTask(task1)
-
-        initUI()
+//        mm()
+        initializeViews()
+        initializeAppBar()
         observeTasksList()
 
         return binding.root
     }
 
-    private fun initUI() {
-        tasksAdapter = TaskAdapter(this, this)
-        binding.tasksRv.layoutManager = LinearLayoutManager(requireContext())
-        binding.tasksRv.adapter = tasksAdapter
+    private fun mm() = lifecycleScope.launch(Dispatchers.Main){
+        val preferences = requireContext().datastore.data.first()
 
-        val title1 = TaskType.ARGENT
-        val title2 = TaskType.OTHERS
+        val upcomingChecked = preferences[BottomSheetFragment.UPCOMING_KEY] ?: false
+        val pastDueChecked = preferences[BottomSheetFragment.PAST_DUE_KEY] ?: false
+        val allTasksChecked = preferences[BottomSheetFragment.ALL_TASKS_KEY] ?: false
 
-        // Create a list of TaskItem objects
-        val taskItems = listOf(
-            TaskAdapter.TaskItem.Title(title1)
-        )
+        if(upcomingChecked) mainViewModel.getTasksWithDueDateUpcoming()
 
-        // Update the adapter with the list of TaskItem objects
-        tasksAdapter.updateData(taskItems)
+        if(pastDueChecked) mainViewModel.getTasksWithDueDatePassed()
+
+        if(allTasksChecked) mainViewModel.initData()
+    }
+
+    private fun initializeViews() {
+        initializeAdapter()
 
         binding.addTaskFloatingButton.setOnClickListener {
-            val action = AllTasksFragmentDirections.actionAllTasksFragmentToAddNewTaskFragment()
-            findNavController().navigate(action)
+            navigateToAddNewTaskFragment()
         }
     }
 
+    private fun initializeAdapter() {
+        tasksAdapter = TaskAdapter(this, this)
+        binding.tasksRv.layoutManager = LinearLayoutManager(requireContext())
+        binding.tasksRv.adapter = tasksAdapter
+    }
 
     private fun observeTasksList() {
         mainViewModel.tasksList.observe(viewLifecycleOwner) { taskItems ->
             taskItems?.let {
                 if (::tasksAdapter.isInitialized) {
-                    val filteredList = filterTasks(taskItems)
-                    tasksAdapter.updateData(filteredList)
+                    tasksAdapter.updateData(filterTasks(taskItems))
+
+                    val noResultsTextView = binding.noResultsTextView
+                    noResultsTextView.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
+                } else {
+                    initializeAdapter()
                 }
             }
         }
@@ -82,7 +108,6 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
     private fun filterTasks(taskItems: List<TaskAdapter.TaskItem>): List<TaskAdapter.TaskItem> {
         val filteredList = mutableListOf<TaskAdapter.TaskItem>()
 
-        // Filter urgent tasks and add title
         val urgentTasks = taskItems.filterIsInstance<TaskAdapter.TaskItem.Task>()
             .filter { it.task.urgent }
         if (urgentTasks.isNotEmpty()) {
@@ -90,7 +115,6 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
             filteredList.addAll(urgentTasks)
         }
 
-        // Filter others tasks and add title
         val othersTasks = taskItems.filterIsInstance<TaskAdapter.TaskItem.Task>()
             .filter { !it.task.urgent }
         if (othersTasks.isNotEmpty()) {
@@ -101,34 +125,66 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
         return filteredList
     }
 
+    private fun navigateToAddNewTaskFragment() {
+        val action = AllTasksFragmentDirections.actionAllTasksFragmentToAddNewTaskFragment()
+        findNavController().navigate(action)
+    }
+
+    private fun initializeAppBar() {
+        val menuHost: MenuHost = binding.toolbar
+
+        menuHost.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.toolbar,menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.filterTasks -> {
+                        onFilterTasksClicked()
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
+        val searchItem = binding.toolbar.menu.findItem(R.id.searchTask)
+        val searchView = searchItem?.actionView as SearchView
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                handler?.removeCallbacksAndMessages(null)
+                handler = Handler(Looper.getMainLooper())
+                handler?.postDelayed({ filterTasksBySearch(newText) }, FILTER_DELAY)
+                return true
+            }
+        })
+    }
+
+    private fun filterTasksBySearch(query: String?) {
+        mainViewModel.filterList(query)
+    }
+
     private fun onFilterTasksClicked() {
-        Log.d("main", "Filter tasks clicked!")
+        val action = AllTasksFragmentDirections.actionAllTasksFragmentToButtomSheetFragment()
+        navController.navigate(action)
     }
 
     override fun onCompletedChanged(task: Task) {
         mainViewModel.onCompletedChanged(task)
-        Log.d("main", "onCompletedChanged")
     }
 
     override fun onCardViewClicked(task: Task) {
         val action = AllTasksFragmentDirections.actionAllTasksFragmentToTaskDescriptionFragment(task.id)
         navController.navigate(action)
-        Log.d("main", "onCardViewClicked")
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.toolbar, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d("main", "onOptionsItemSelected")
-        return when (item.itemId) {
-            R.id.filterTasks -> {
-                onFilterTasksClicked()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
+    companion object {
+        private const val FILTER_DELAY: Long = 500
     }
 }

@@ -28,6 +28,9 @@
         <action
             android:id="@+id/action_allTasksFragment_to_taskDescriptionFragment"
             app:destination="@id/taskDescriptionFragment" />
+        <action
+            android:id="@+id/action_allTasksFragment_to_buttomSheetFragment"
+            app:destination="@id/buttomSheetFragment" />
     </fragment>
 
     <fragment
@@ -51,4 +54,13 @@
             android:id="@+id/action_addNewTaskFragment_to_allTasksFragment"
             app:destination="@id/allTasksFragment" />
     </fragment>
+    <dialog
+        android:id="@+id/buttomSheetFragment"
+        android:name="com.example.todoapp.ui.main.BottomSheetFragment"
+        android:label="fragment_buttom_sheet"
+        tools:layout="@layout/fragment_buttom_sheet" >
+        <action
+            android:id="@+id/action_buttomSheetFragment_to_allTasksFragment"
+            app:destination="@id/allTasksFragment" />
+    </dialog>
 </navigation>

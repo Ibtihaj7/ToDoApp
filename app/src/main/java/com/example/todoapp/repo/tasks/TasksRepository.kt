@@ -5,14 +5,10 @@ import kotlinx.coroutines.flow.Flow
 
 interface TasksRepository {
     suspend fun addNewTask(task: Task)
-    fun getCompletedTasks():Flow<List<Task>>
-    fun getUrgentTasks():Flow<List<Task>>
-    fun getOthersTasks():Flow<List<Task>>
+    suspend fun getCompletedTasks():Flow<List<Task>>
     suspend fun getAllTasks():Flow<List<Task>>
-    fun addToUrgent(task: Task)
-    fun addToOthers(task: Task)
-    fun addToCompleted(task: Task)
-    fun removeFromCompleted(task: Task)
-    fun getTask(taskId: Int): Task?
     suspend fun deleteTask(task: Task)
+    suspend fun updateTask(task: Task)
+    suspend fun getTasksWithDueDateUpcoming(): List<Task>
+    suspend fun getTasksWithDueDatePassed(): List<Task>
 }

@@ -22,4 +22,20 @@
     <string name="add_task_button">إضافة مهمة</string>
     <string name="date_picker_text">١ يناير ٢٠٢٠</string>
     <string name="complete_button_title">تعيين كمنتهي</string>
+    <string name="completed_task_toolbar_title">المهمات المنتهية</string>
+    <string name="confirmation_title">هل أنت متأكد؟</string>
+    <string name="confirmation_message">هل انت متاكد انك تريد حذف المهمة؟</string>
+    <string name="cancel">إلغاء</string>
+    <string name="decline">رفض</string>
+    <string name="accept">قبول</string>
+    <string name="no_results_found">لا يوجد نتائج</string>
+    <string name="no_items_to_display">لا يوجد عناصر لعرضها</string>
+    <string name="error_title_required">العنوان مطلوب</string>
+    <string name="error_description_required">الوصف مطلوب</string>
+    <string name="successfully_task_added">تمت إضافة المهمة بنجاح</string>
+    <string name="filter_by_text">فلترة بواسطة</string>
+    <string name="upcoming_text">اقترب موعد استحقاقها</string>
+    <string name="past_due_text">فات موعد استحقاقها</string>
+    <string name="all_tasks_text">كل المهمات</string>
+
 </resources>

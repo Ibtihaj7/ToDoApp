@@ -29,8 +29,6 @@ class TaskViewHolder(
         binding.iconImageView.setImageResource(imgId)
 
         binding.iconImageView.setOnClickListener {
-            val imgId = if(task.isCompleted) R.drawable.ic_not_completed else R.drawable.ic_completed
-            binding.iconImageView.setImageResource(imgId)
             completedChangeListener.onCompletedChanged(task)
         }
     }

@@ -20,6 +20,21 @@
     <string name="due_date_error">Please select a due date</string>
     <string name="add_task_button">Add Task</string>
     <string name="date_picker_text">JAN 01, 2020</string>
-    <string name="complete_button_title">Complete</string>
+    <string name="complete_button_title">Mark as Completed</string>
+    <string name="completed_task_toolbar_title">Completed Tasks</string>
+    <string name="confirmation_title">Are you sure?</string>
+    <string name="confirmation_message">Are you sure you want to delete the task?</string>
+    <string name="cancel">Cancel</string>
+    <string name="decline">Decline</string>
+    <string name="accept">Accept</string>
+    <string name="no_results_found">No Results Found</string>
+    <string name="no_items_to_display">No Items to Display</string>
+    <string name="error_title_required">Title is required</string>
+    <string name="error_description_required">Description is required</string>
+    <string name="successfully_task_added">Task added successfully</string>
+    <string name="filter_by_text">Filter by</string>
+    <string name="upcoming_text">Upcoming</string>
+    <string name="past_due_text">Past Due</string>
+    <string name="all_tasks_text">All Tasks</string>
 
 </resources>

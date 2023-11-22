@@ -2,7 +2,6 @@ package com.example.todoapp.ui.main.adapter
 
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.databinding.CustomeTasksTitleBinding
-import com.example.todoapp.model.TaskSection
 import com.example.todoapp.model.TaskType
 
 class TitleViewHolder(

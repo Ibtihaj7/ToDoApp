@@ -10,6 +10,4 @@ import javax.inject.Inject
 class TaskDescriptionViewModel @Inject constructor(
     private val tasksRepository: TasksRepository
 ):ViewModel() {
-    fun getTask(taskId: Int): Task? = tasksRepository.getTask(taskId)
-
 }
