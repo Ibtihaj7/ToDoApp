@@ -1,7 +1,6 @@
 package com.example.todoapp.ui.main.taskdescription
 
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,7 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class TaskDescriptionFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
-    private lateinit var binding:FragmentTaskDescriptionBinding
+    private lateinit var binding: FragmentTaskDescriptionBinding
     private val args: TaskDescriptionFragmentArgs by navArgs()
     private lateinit var navController: NavController
     private lateinit var context: Context
@@ -34,53 +33,69 @@ class TaskDescriptionFragment : Fragment() {
     ): View {
         binding = FragmentTaskDescriptionBinding.inflate(inflater)
 
+        initViews()
+
+        return binding.root
+    }
+
+    private fun initViews() {
         setNavigationOnClickListener()
         val taskId = args.taskId
         val task = mainViewModel.getTaskById(taskId)
         context = requireContext()
 
-        if(task.isCompleted){
-            binding.materialDivider.visibility = View.GONE
-            binding.completeBtn.visibility = View.GONE
-        }
-        binding.urgentImageView.visibility = if(!task.urgent) View.GONE else View.VISIBLE
+        updateUIBasedOnTaskStatus(task)
 
         navController = findNavController()
 
-        setDeleteTask(task!!)
-        setCompletedTask(task)
+        setDeleteTaskClickListener(task)
+        setCompleteTaskClickListener(task)
 
         binding.task = task
-        return binding.root
     }
 
-    private fun setCompletedTask(task: Task) {
+    private fun updateUIBasedOnTaskStatus(task: Task) {
+        if (task.isCompleted) {
+            binding.materialDivider.visibility = View.GONE
+            binding.completeBtn.visibility = View.GONE
+        }
+        binding.urgentImageView.visibility = if (!task.urgent) View.GONE else View.VISIBLE
+    }
+
+    private fun setCompleteTaskClickListener(task: Task) {
         binding.completeBtn.setOnClickListener {
-            mainViewModel.onCompletedChanged(task)
-            showTaskAddedSnackBar(getSuccessfullyTaskCompleted(context))
-            navigateToAllTasksFragment()
+            completeTask(task)
         }
     }
 
-    private fun setDeleteTask(task: Task) {
+    private fun setDeleteTaskClickListener(task: Task) {
         binding.taskDelete.setOnClickListener {
-            val builder = MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.confirmation_title)
-                .setMessage(R.string.confirmation_message)
-                .setNegativeButton(R.string.decline) { _, _ -> }
-
-            val dialog = builder.setPositiveButton(R.string.accept, null).show()
-
-            dialog.getButton(DialogInterface.BUTTON_POSITIVE)?.setOnClickListener {
-                mainViewModel.deleteTask(task)
-                showTaskAddedSnackBar(getSuccessfullyTaskAdded(context))
-                navigateToAllTasksFragment()
-                dialog.cancel()
-            }
+            showDeleteTaskConfirmationDialog(task)
         }
     }
 
-    private fun showTaskAddedSnackBar(message:String) {
+    private fun showDeleteTaskConfirmationDialog(task: Task) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.confirmation_title)
+            .setMessage(R.string.confirmation_message)
+            .setNegativeButton(R.string.decline) { _, _ -> }
+            .setPositiveButton(R.string.accept) { _, _ -> deleteTask(task) }
+            .show()
+    }
+
+    private fun completeTask(task: Task) {
+        mainViewModel.onCompletedChanged(task)
+        showTaskAddedSnackBar(getSuccessfullyTaskCompleted(context))
+        navigateToAllTasksFragment()
+    }
+
+    private fun deleteTask(task: Task) {
+        mainViewModel.deleteTask(task)
+        showTaskAddedSnackBar(getSuccessfullyTaskAdded(context))
+        navigateToAllTasksFragment()
+    }
+
+    private fun showTaskAddedSnackBar(message: String) {
         Snackbar.make(
             binding.root,
             message,
@@ -92,18 +107,21 @@ class TaskDescriptionFragment : Fragment() {
         val action = TaskDescriptionFragmentDirections.actionTaskDescriptionFragmentToAllTasksFragment()
         navController.navigate(action)
     }
+
     private fun setNavigationOnClickListener() {
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbar)
         (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         binding.toolbar.setNavigationOnClickListener {
-            val action = TaskDescriptionFragmentDirections.actionTaskDescriptionFragmentToAllTasksFragment()
-            navController.navigate(action)
+            navigateToAllTasksFragment()
         }
     }
 
-    companion object{
-        private fun getSuccessfullyTaskAdded(context: Context) =  context.getString(R.string.successfully_task_deleted)
-        private fun getSuccessfullyTaskCompleted(context: Context) = context.getString(R.string.successfully_task_completed)
+    companion object {
+        private fun getSuccessfullyTaskAdded(context: Context) =
+            context.getString(R.string.successfully_task_deleted)
+
+        private fun getSuccessfullyTaskCompleted(context: Context) =
+            context.getString(R.string.successfully_task_completed)
     }
 }
