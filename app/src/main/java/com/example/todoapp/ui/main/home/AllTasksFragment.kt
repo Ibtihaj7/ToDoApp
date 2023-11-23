@@ -1,6 +1,5 @@
 package com.example.todoapp.ui.main.home
 
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -17,7 +16,6 @@ import androidx.core.view.MenuProvider
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -34,13 +32,13 @@ import com.example.todoapp.ui.main.MainViewModel
 import com.example.todoapp.ui.main.PostDetailListener
 import com.example.todoapp.ui.main.adapter.TaskAdapter
 import com.example.todoapp.utils.Constant.ALL_TASKS_KEY
-import com.example.todoapp.utils.Constant.DATASTORE_NAME
 import com.example.todoapp.utils.Constant.PAST_DUE_KEY
 import com.example.todoapp.utils.Constant.UPCOMING_KEY
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener {
@@ -48,8 +46,10 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
     private lateinit var navController: NavController
     private lateinit var binding: FragmentAllTasksBinding
     private lateinit var tasksAdapter: TaskAdapter
-    private val Context.datastore: DataStore<Preferences> by preferencesDataStore(DATASTORE_NAME)
     private var handler: Handler? = null
+
+    @Inject
+    lateinit var dataStore: DataStore<Preferences>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,7 +58,7 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
         binding = FragmentAllTasksBinding.inflate(inflater)
         navController = findNavController()
 
-//        initializeFiltersBasedOnPreferences()
+        initializeFiltersBasedOnPreferences()
         initializeViews()
         initializeAppBar()
         observeTasksList()
@@ -68,7 +68,7 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
 
     private fun initializeFiltersBasedOnPreferences() = lifecycleScope.launch(Dispatchers.Main){
        try{
-            val preferences = requireContext().datastore.data.first()
+            val preferences = dataStore.data.first()
 
             val upcomingChecked = preferences[UPCOMING_KEY] ?: false
             val pastDueChecked = preferences[PAST_DUE_KEY] ?: false
@@ -175,12 +175,12 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
 
     private fun filterTasksBySearch(query: String?) {
         mainViewModel.filterList(query)
-//        updateDataStorePreferences()
+        updateDataStorePreferences()
     }
 
     private fun updateDataStorePreferences() {
         lifecycleScope.launch {
-            requireContext().datastore.edit { preferences ->
+            dataStore.edit { preferences ->
                 preferences[UPCOMING_KEY] = false
                 preferences[PAST_DUE_KEY] = false
                 preferences[ALL_TASKS_KEY] = false
