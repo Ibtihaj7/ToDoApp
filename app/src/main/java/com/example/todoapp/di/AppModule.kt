@@ -16,6 +16,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
@@ -40,5 +41,5 @@ object AppModule {
 
     @Provides
     fun provideTasksRepository(dbRepo:DatabaseRepository): TasksRepository = TasksRepositoryImpl(dbRepo)
-}
 
+}

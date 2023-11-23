@@ -3,6 +3,8 @@ package com.example.todoapp.ui.main.home
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -65,15 +67,18 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
     }
 
     private fun initializeFiltersBasedOnPreferences() = lifecycleScope.launch(Dispatchers.Main){
-        val preferences = requireContext().datastore.data.first()
+       try{
+            val preferences = requireContext().datastore.data.first()
 
-        val upcomingChecked = preferences[UPCOMING_KEY] ?: false
-        val pastDueChecked = preferences[PAST_DUE_KEY] ?: false
-        val allTasksChecked = preferences[ALL_TASKS_KEY] ?: false
+            val upcomingChecked = preferences[UPCOMING_KEY] ?: false
+            val pastDueChecked = preferences[PAST_DUE_KEY] ?: false
 
-        if(upcomingChecked) mainViewModel.getTasksWithDueDateUpcoming()
-        if(pastDueChecked) mainViewModel.getTasksWithDueDatePassed()
-        if(allTasksChecked) mainViewModel.initData()
+            if(upcomingChecked) mainViewModel.getTasksWithDueDateUpcoming()
+            if(pastDueChecked) mainViewModel.getTasksWithDueDatePassed()
+       } catch (e: Exception) {
+           e.printStackTrace()
+           Log.d("main",e.message.toString())
+       }
     }
 
     private fun initializeViews() {
@@ -147,7 +152,7 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
                 }
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
-//        setupSearchViewListener()
+        setupSearchViewListener()
     }
 
     private fun setupSearchViewListener() {
@@ -160,6 +165,8 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
+                handler?.removeCallbacksAndMessages(null)
+                handler = Handler(Looper.getMainLooper())
                 handler?.postDelayed({ filterTasksBySearch(newText) }, FILTER_DELAY)
                 return true
             }
