@@ -175,6 +175,10 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
 
     private fun filterTasksBySearch(query: String?) {
         mainViewModel.filterList(query)
+//        updateDataStorePreferences()
+    }
+
+    private fun updateDataStorePreferences() {
         lifecycleScope.launch {
             requireContext().datastore.edit { preferences ->
                 preferences[UPCOMING_KEY] = false
