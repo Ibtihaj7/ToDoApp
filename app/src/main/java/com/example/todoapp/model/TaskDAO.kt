@@ -6,8 +6,8 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.TypeConverters
 import androidx.room.Update
-import kotlinx.coroutines.flow.Flow
 import com.example.todoapp.utils.Constant.TASKS_TABLE
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 @TypeConverters(DateConverter::class)
@@ -23,7 +23,7 @@ interface TaskDAO {
     @Update
     suspend fun updateTask(task: Task)
     @Query("SELECT * FROM $TASKS_TABLE WHERE dueDate >= :currentDate")
-    fun getTasksWithDueDateUpcoming(currentDate: Long): List<Task>
+    suspend fun getTasksWithDueDateUpcoming(currentDate: Long): List<Task>
     @Query("SELECT * FROM $TASKS_TABLE WHERE dueDate < :currentDate")
-    fun getTasksWithDueDatePassed(currentDate: Long): List<Task>
+    suspend fun getTasksWithDueDatePassed(currentDate: Long): List<Task>
 }

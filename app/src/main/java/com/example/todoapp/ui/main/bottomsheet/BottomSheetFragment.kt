@@ -1,34 +1,24 @@
 package com.example.todoapp.ui.main.bottomsheet
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.todoapp.R
 import com.example.todoapp.databinding.FragmentButtomSheetBinding
 import com.example.todoapp.ui.main.MainViewModel
-import com.example.todoapp.utils.Constant.ALL_TASKS_KEY
-import com.example.todoapp.utils.Constant.PAST_DUE_KEY
-import com.example.todoapp.utils.Constant.UPCOMING_KEY
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class BottomSheetFragment : BottomSheetDialogFragment() {
     private lateinit var binding: FragmentButtomSheetBinding
     private val mainViewModel: MainViewModel by activityViewModels()
-
-    @Inject
-     lateinit var dataStore: DataStore<Preferences>
+    private val viewModel : BottomSheetViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,51 +35,15 @@ class BottomSheetFragment : BottomSheetDialogFragment() {
     }
 
     private fun setUpStatus() = lifecycleScope.launch {
-        try {
-            val preferences = dataStore.data.first()
-
-            val upcomingChecked = preferences[UPCOMING_KEY] ?: false
-            val pastDueChecked = preferences[PAST_DUE_KEY] ?: false
-            val allTasksChecked = preferences[ALL_TASKS_KEY] ?: false
-
-            if (upcomingChecked) binding.upcomingIcon.setImageResource(R.drawable.ic_green_checked)
-            if (pastDueChecked) binding.pastDueIcon.setImageResource(R.drawable.ic_green_checked)
-            if (allTasksChecked) binding.clearFilterIcon.setImageResource(R.drawable.ic_green_checked)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Log.d("main",e.message.toString())
-        }
-    }
-
-    private fun setAllTasksClicked() {
-        binding.clearFilter.setOnClickListener {
-            mainViewModel.initData()
-
-            saveFilterStatus(pastDue = false, upcoming = false,allTasks= true)
-
-            binding.upcomingIcon.setImageResource(R.drawable.ic_gray_checked)
-            binding.pastDueIcon.setImageResource(R.drawable.ic_gray_checked)
-            binding.clearFilterIcon.setImageResource(R.drawable.ic_green_checked)
-        }
-    }
-
-    private fun setPastDueClicked() {
-        binding.pastDue.setOnClickListener {
-            mainViewModel.getTasksWithDueDatePassed()
-
-            saveFilterStatus(pastDue = true, upcoming = false, allTasks= false)
-
-            binding.upcomingIcon.setImageResource(R.drawable.ic_gray_checked)
-            binding.pastDueIcon.setImageResource(R.drawable.ic_green_checked)
-            binding.clearFilterIcon.setImageResource(R.drawable.ic_gray_checked)
-        }
+        if (viewModel.isUpcomingChecked()) binding.upcomingIcon.setImageResource(R.drawable.ic_green_checked)
+        if (viewModel.isPastDueChecked()) binding.pastDueIcon.setImageResource(R.drawable.ic_green_checked)
+        if (viewModel.isAllTasksChecked()) binding.clearFilterIcon.setImageResource(R.drawable.ic_green_checked)
     }
 
     private fun setUpcomingClick() {
         binding.upcoming.setOnClickListener {
-            mainViewModel.getTasksWithDueDateUpcoming()
-
-            saveFilterStatus(pastDue = false, upcoming = true,allTasks= false)
+            mainViewModel.saveFilterStatus(pastDue = false, upcoming = true,allTasks= false)
+            mainViewModel.initData()
 
             binding.upcomingIcon.setImageResource(R.drawable.ic_green_checked)
             binding.pastDueIcon.setImageResource(R.drawable.ic_gray_checked)
@@ -97,15 +51,25 @@ class BottomSheetFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun saveFilterStatus(pastDue: Boolean, upcoming: Boolean,allTasks:Boolean)= lifecycleScope.launch {
-        try {
-            dataStore.edit { preferences ->
-                preferences[UPCOMING_KEY] = upcoming
-                preferences[PAST_DUE_KEY] = pastDue
-                preferences[ALL_TASKS_KEY] = allTasks
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+    private fun setPastDueClicked() {
+        binding.pastDue.setOnClickListener {
+            mainViewModel.saveFilterStatus(pastDue = true, upcoming = false, allTasks= false)
+            mainViewModel.initData()
+
+            binding.upcomingIcon.setImageResource(R.drawable.ic_gray_checked)
+            binding.pastDueIcon.setImageResource(R.drawable.ic_green_checked)
+            binding.clearFilterIcon.setImageResource(R.drawable.ic_gray_checked)
+        }
+    }
+
+    private fun setAllTasksClicked() {
+        binding.clearFilter.setOnClickListener {
+            mainViewModel.saveFilterStatus(pastDue = false, upcoming = false,allTasks= true)
+            mainViewModel.initData()
+
+            binding.upcomingIcon.setImageResource(R.drawable.ic_gray_checked)
+            binding.pastDueIcon.setImageResource(R.drawable.ic_gray_checked)
+            binding.clearFilterIcon.setImageResource(R.drawable.ic_green_checked)
         }
     }
 }

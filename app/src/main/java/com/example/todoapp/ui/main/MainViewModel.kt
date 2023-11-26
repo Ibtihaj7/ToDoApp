@@ -1,5 +1,9 @@
 package com.example.todoapp.ui.main
 
+import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,8 +11,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.todoapp.model.Task
 import com.example.todoapp.repo.tasks.TasksRepository
 import com.example.todoapp.ui.main.adapter.TaskAdapter
+import com.example.todoapp.utils.Constant
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -23,13 +29,17 @@ class MainViewModel @Inject constructor(
     val tasksList: LiveData<List<TaskAdapter.TaskItem>> get() = _tasksList
     val completedTasksLis: LiveData<List<TaskAdapter.TaskItem>> get() = _completedTasksList
 
+    @Inject
+    lateinit var dataStore: DataStore<Preferences>
+
+    init {
+        initData()
+    }
+
     fun initData() {
         viewModelScope.launch {
             tasksRepo.getAllTasks().collect { tasks ->
-                tasks.let {
-                    val taskItems = tasks.map { TaskAdapter.TaskItem.Task(it) }
-                    _tasksList.value = taskItems
-                }
+                updateTasksListBasedOnPreferences(tasks)
             }
         }
 
@@ -43,7 +53,25 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private suspend fun updateTasksListBasedOnPreferences(tasks: List<Task>) = viewModelScope.launch{
+        try {
+            val preferences = dataStore.data.first()
+
+            val upcomingChecked = preferences[Constant.UPCOMING_KEY] ?: false
+            val pastDueChecked = preferences[Constant.PAST_DUE_KEY] ?: false
+
+            if(upcomingChecked) _tasksList.value = tasksRepo.getTasksWithDueDateUpcoming().map { TaskAdapter.TaskItem.Task(it) }
+            else if(pastDueChecked) _tasksList.value = tasksRepo.getTasksWithDueDatePassed().map { TaskAdapter.TaskItem.Task(it) }
+            else _tasksList.value = tasks.map { TaskAdapter.TaskItem.Task(it) }
+        }catch (e: Exception) {
+            e.printStackTrace()
+            Log.d("main",e.message.toString())
+        }
+    }
+
+
     fun addNewTask(task: Task) {
+        updateDataStorePreferences()
         viewModelScope.launch { tasksRepo.addNewTask(task) }
     }
 
@@ -65,20 +93,9 @@ class MainViewModel @Inject constructor(
         tasksRepo.deleteTask(task)
     }
 
-    fun getTasksWithDueDateUpcoming() = viewModelScope.launch {
-        val tasks = tasksRepo.getTasksWithDueDateUpcoming()
-        val tasksItem = tasks.map { TaskAdapter.TaskItem.Task(it) }
-        _tasksList.value = tasksItem
-    }
-
-    fun getTasksWithDueDatePassed()= viewModelScope.launch {
-        val tasks = tasksRepo.getTasksWithDueDatePassed()
-        val tasksItem = tasks.map { TaskAdapter.TaskItem.Task(it) }
-        _tasksList.value = tasksItem
-    }
-
     fun filterList(query: String?) {
         viewModelScope.launch {
+            updateDataStorePreferences()
             tasksRepo.getAllTasks()
                 .onEach { posts ->
                     val filteredPosts = if (query.isNullOrBlank()) {
@@ -91,6 +108,26 @@ class MainViewModel @Inject constructor(
                     _tasksList.value = filteredPosts.map { TaskAdapter.TaskItem.Task(it) }
                 }
                 .collect()
+        }
+    }
+
+    private fun updateDataStorePreferences() = viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[Constant.UPCOMING_KEY] = false
+                preferences[Constant.PAST_DUE_KEY] = false
+                preferences[Constant.ALL_TASKS_KEY] = false
+            }
+        }
+
+    fun saveFilterStatus(pastDue: Boolean, upcoming: Boolean,allTasks:Boolean)= viewModelScope.launch {
+        try {
+            dataStore.edit { preferences ->
+                preferences[Constant.UPCOMING_KEY] = upcoming
+                preferences[Constant.PAST_DUE_KEY] = pastDue
+                preferences[Constant.ALL_TASKS_KEY] = allTasks
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

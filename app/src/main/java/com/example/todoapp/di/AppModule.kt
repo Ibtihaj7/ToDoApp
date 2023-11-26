@@ -8,7 +8,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.example.todoapp.model.MyRoomDatabase
-import com.example.todoapp.model.TaskDAO
 import com.example.todoapp.repo.database.DatabaseRepository
 import com.example.todoapp.repo.database.DatabaseRepositoryImpl
 import com.example.todoapp.repo.tasks.TasksRepository
@@ -42,12 +41,13 @@ object AppModule {
 
     @Provides
     fun provideDao(db: MyRoomDatabase) = db.taskDao()
-
+    @Singleton
     @Provides
-    fun provideDatabaseRepository(taskDao:TaskDAO): DatabaseRepository = DatabaseRepositoryImpl(taskDao)
+    fun provideDatabaseRepository(dbRepo:DatabaseRepositoryImpl): DatabaseRepository = dbRepo
 
+    @Singleton
     @Provides
-    fun provideTasksRepository(dbRepo:DatabaseRepository): TasksRepository = TasksRepositoryImpl(dbRepo)
+    fun provideTasksRepository(tasksRepositoryImpl:TasksRepositoryImpl): TasksRepository = tasksRepositoryImpl
 
     @Singleton
     @Provides

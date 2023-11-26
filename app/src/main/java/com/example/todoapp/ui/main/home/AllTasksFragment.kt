@@ -3,7 +3,6 @@ package com.example.todoapp.ui.main.home
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -13,13 +12,9 @@ import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,14 +26,7 @@ import com.example.todoapp.ui.main.CompletedChangeListener
 import com.example.todoapp.ui.main.MainViewModel
 import com.example.todoapp.ui.main.PostDetailListener
 import com.example.todoapp.ui.main.adapter.TaskAdapter
-import com.example.todoapp.utils.Constant.ALL_TASKS_KEY
-import com.example.todoapp.utils.Constant.PAST_DUE_KEY
-import com.example.todoapp.utils.Constant.UPCOMING_KEY
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener {
@@ -48,9 +36,6 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
     private lateinit var tasksAdapter: TaskAdapter
     private var handler: Handler? = null
 
-    @Inject
-    lateinit var dataStore: DataStore<Preferences>
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -58,27 +43,11 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
         binding = FragmentAllTasksBinding.inflate(inflater)
         navController = findNavController()
 
-        initializeFiltersBasedOnPreferences()
         initializeViews()
         initializeAppBar()
         observeTasksList()
 
         return binding.root
-    }
-
-    private fun initializeFiltersBasedOnPreferences() = lifecycleScope.launch(Dispatchers.Main){
-       try{
-            val preferences = dataStore.data.first()
-
-            val upcomingChecked = preferences[UPCOMING_KEY] ?: false
-            val pastDueChecked = preferences[PAST_DUE_KEY] ?: false
-
-            if(upcomingChecked) mainViewModel.getTasksWithDueDateUpcoming()
-            if(pastDueChecked) mainViewModel.getTasksWithDueDatePassed()
-       } catch (e: Exception) {
-           e.printStackTrace()
-           Log.d("main",e.message.toString())
-       }
     }
 
     private fun initializeViews() {
@@ -98,14 +67,12 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
     private fun observeTasksList() {
         mainViewModel.tasksList.observe(viewLifecycleOwner) { taskItems ->
             taskItems?.let {
-                if (::tasksAdapter.isInitialized) {
-                    tasksAdapter.updateData(filterTasks(taskItems))
 
-                    val noResultsTextView = binding.noResultsTextView
-                    noResultsTextView.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
-                } else {
-                    initializeAdapter()
-                }
+                tasksAdapter.updateData(filterTasks(taskItems))
+
+                val noResultsTextView = binding.noResultsTextView
+                noResultsTextView.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
+
             }
         }
     }
@@ -175,17 +142,6 @@ class AllTasksFragment : Fragment(), CompletedChangeListener, PostDetailListener
 
     private fun filterTasksBySearch(query: String?) {
         mainViewModel.filterList(query)
-        updateDataStorePreferences()
-    }
-
-    private fun updateDataStorePreferences() {
-        lifecycleScope.launch {
-            dataStore.edit { preferences ->
-                preferences[UPCOMING_KEY] = false
-                preferences[PAST_DUE_KEY] = false
-                preferences[ALL_TASKS_KEY] = false
-            }
-        }
     }
 
     private fun onFilterTasksClicked() {

@@ -9,6 +9,6 @@ interface DatabaseRepository {
     fun getAllTasks(): Flow<List<Task>>
     fun getCompletedTasks():Flow<List<Task>>
     suspend fun updateTask(task: Task)
-    fun getTasksWithDueDateUpcoming(): List<Task>
-    fun getTasksWithDueDatePassed(): List<Task>
+    suspend fun getTasksWithDueDateUpcoming(): List<Task>
+    suspend fun getTasksWithDueDatePassed(): List<Task>
 }
