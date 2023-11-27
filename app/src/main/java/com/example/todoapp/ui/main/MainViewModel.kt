@@ -35,7 +35,7 @@ class MainViewModel @Inject constructor(
         initData()
     }
 
-    fun initData() {
+    private fun initData() {
         viewModelScope.launch {
             tasksRepo.getAllTasks().collect { tasks ->
                 updateTasksListBasedOnPreferences(tasks)
@@ -123,8 +123,22 @@ class MainViewModel @Inject constructor(
                 preferences[Constant.PAST_DUE_KEY] = pastDue
                 preferences[Constant.ALL_TASKS_KEY] = allTasks
             }
+            updateLists()
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private suspend fun updateLists() {
+        val preferences = dataStore.data.first()
+
+        val upcomingChecked = preferences[Constant.UPCOMING_KEY] ?: false
+        val pastDueChecked = preferences[Constant.PAST_DUE_KEY] ?: false
+
+        if(upcomingChecked) _tasksList.value = tasksRepo.getTasksWithDueDateUpcoming().map { TaskAdapter.TaskItem.Task(it) }
+        else if(pastDueChecked) _tasksList.value = tasksRepo.getTasksWithDueDatePassed().map { TaskAdapter.TaskItem.Task(it) }
+        else tasksRepo.getAllTasks().collect{ tasks ->
+            _tasksList.value = tasks.map { TaskAdapter.TaskItem.Task(it) }
         }
     }
 }

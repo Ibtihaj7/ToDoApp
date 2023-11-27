@@ -1,7 +1,6 @@
 package com.example.todoapp.ui.main.addnewtask
 
 import android.app.DatePickerDialog
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -29,7 +28,6 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     private lateinit var datePickerDialog: DatePickerDialog
     private lateinit var navController: NavController
     private val mainViewModel: MainViewModel by activityViewModels()
-    private lateinit var context: Context
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,7 +35,6 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     ): View {
         binding = FragmentAddNewTaskBinding.inflate(inflater, container, false)
         navController = findNavController()
-        context = requireContext()
 
         setupUI()
         return binding.root
@@ -63,7 +60,7 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
             val selectedDate = selectedDateString.toDate()
             val newTask = Task(0,title,description,selectedDate,isUrgent)
             mainViewModel.addNewTask(newTask)
-            showTaskAddedSnackBar()
+            showTaskAddedSnackBar(requireContext().getString(R.string.successfully_task_added))
             navigateToAllTasksFragment()
         } else {
             handleValidationErrors(title, description, selectedDateString)
@@ -82,10 +79,10 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
     private fun validateInput(title: String, description: String, selectedDate: String) =
         !(title.isEmpty() || description.isEmpty() || selectedDate.isEmpty())
 
-    private fun showTaskAddedSnackBar() {
+    private fun showTaskAddedSnackBar(message:String) {
         Snackbar.make(
             binding.root,
-            getTaskAddedSuccessfully(context),
+            message,
             Snackbar.LENGTH_SHORT
         ).show()
     }
@@ -95,8 +92,8 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         description: String,
         selectedDate: String
     ) {
-        binding.titleInputLayout.error = if (title.isEmpty()) getTitleRequiredError(context) else null
-        binding.descriptionInputLayout.error = if (description.isEmpty()) getDescriptionRequiredError(context) else null
+        binding.titleInputLayout.error = if (title.isEmpty()) requireContext().getString(R.string.error_title_required) else null
+        binding.descriptionInputLayout.error = if (description.isEmpty()) requireContext().getString(R.string.error_description_required) else null
         binding.dueDateErrorTextView.visibility = if (selectedDate.isEmpty()) View.VISIBLE else View.GONE
     }
 
@@ -147,11 +144,5 @@ class AddNewTaskFragment : Fragment(), DatePickerDialog.OnDateSetListener {
         OCT("OCT"),
         NOV("NOV"),
         DEC("DEC")
-    }
-
-    companion object {
-        private fun getTitleRequiredError(context: Context) =  context.getString(R.string.error_title_required)
-        private fun getDescriptionRequiredError(context: Context) = context.getString(R.string.error_description_required)
-        private fun getTaskAddedSuccessfully(context: Context) = context.getString(R.string.successfully_task_added)
     }
 }

@@ -52,8 +52,6 @@ class BottomSheetFragment : BottomSheetDialogFragment() {
     private fun setUpcomingClick() {
         binding.upcoming.setOnClickListener {
             mainViewModel.saveFilterStatus(pastDue = false, upcoming = true,allTasks= false)
-            mainViewModel.initData()
-
             viewModel.checkPreferences()
         }
     }
@@ -61,8 +59,6 @@ class BottomSheetFragment : BottomSheetDialogFragment() {
     private fun setPastDueClicked() {
         binding.pastDue.setOnClickListener {
             mainViewModel.saveFilterStatus(pastDue = true, upcoming = false, allTasks= false)
-            mainViewModel.initData()
-
             viewModel.checkPreferences()
         }
     }
@@ -70,8 +66,6 @@ class BottomSheetFragment : BottomSheetDialogFragment() {
     private fun setAllTasksClicked() {
         binding.clearFilter.setOnClickListener {
             mainViewModel.saveFilterStatus(pastDue = false, upcoming = false,allTasks= true)
-            mainViewModel.initData()
-
             viewModel.checkPreferences()
         }
     }
