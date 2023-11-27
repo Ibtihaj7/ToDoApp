@@ -1,6 +1,5 @@
 package com.example.todoapp.ui.main
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -65,10 +64,8 @@ class MainViewModel @Inject constructor(
             else _tasksList.value = tasks.map { TaskAdapter.TaskItem.Task(it) }
         }catch (e: Exception) {
             e.printStackTrace()
-            Log.d("main",e.message.toString())
         }
     }
-
 
     fun addNewTask(task: Task) {
         updateDataStorePreferences()

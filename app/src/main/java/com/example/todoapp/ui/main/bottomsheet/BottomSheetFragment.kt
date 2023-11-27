@@ -26,7 +26,7 @@ class BottomSheetFragment : BottomSheetDialogFragment() {
     ): View {
         binding = FragmentButtomSheetBinding.inflate(inflater)
 
-        setUpStatus()
+        observeUiStatus()
         setUpcomingClick()
         setPastDueClicked()
         setAllTasksClicked()
@@ -34,10 +34,19 @@ class BottomSheetFragment : BottomSheetDialogFragment() {
         return binding.root
     }
 
-    private fun setUpStatus() = lifecycleScope.launch {
-        if (viewModel.isUpcomingChecked()) binding.upcomingIcon.setImageResource(R.drawable.ic_green_checked)
-        if (viewModel.isPastDueChecked()) binding.pastDueIcon.setImageResource(R.drawable.ic_green_checked)
-        if (viewModel.isAllTasksChecked()) binding.clearFilterIcon.setImageResource(R.drawable.ic_green_checked)
+    private fun observeUiStatus() = lifecycleScope.launch {
+        viewModel.upcomingStatus.observe(viewLifecycleOwner){
+            val img = if(it) R.drawable.ic_green_checked else R.drawable.ic_gray_checked
+            binding.upcomingIcon.setImageResource(img)
+        }
+        viewModel.allTasksStatus.observe(viewLifecycleOwner){
+            val img = if(it) R.drawable.ic_green_checked else R.drawable.ic_gray_checked
+            binding.clearFilterIcon.setImageResource(img)
+        }
+        viewModel.pastDueStatus.observe(viewLifecycleOwner){
+            val img = if(it) R.drawable.ic_green_checked else R.drawable.ic_gray_checked
+            binding.pastDueIcon.setImageResource(img)
+        }
     }
 
     private fun setUpcomingClick() {
@@ -45,9 +54,7 @@ class BottomSheetFragment : BottomSheetDialogFragment() {
             mainViewModel.saveFilterStatus(pastDue = false, upcoming = true,allTasks= false)
             mainViewModel.initData()
 
-            binding.upcomingIcon.setImageResource(R.drawable.ic_green_checked)
-            binding.pastDueIcon.setImageResource(R.drawable.ic_gray_checked)
-            binding.clearFilterIcon.setImageResource(R.drawable.ic_gray_checked)
+            viewModel.checkPreferences()
         }
     }
 
@@ -56,9 +63,7 @@ class BottomSheetFragment : BottomSheetDialogFragment() {
             mainViewModel.saveFilterStatus(pastDue = true, upcoming = false, allTasks= false)
             mainViewModel.initData()
 
-            binding.upcomingIcon.setImageResource(R.drawable.ic_gray_checked)
-            binding.pastDueIcon.setImageResource(R.drawable.ic_green_checked)
-            binding.clearFilterIcon.setImageResource(R.drawable.ic_gray_checked)
+            viewModel.checkPreferences()
         }
     }
 
@@ -67,9 +72,7 @@ class BottomSheetFragment : BottomSheetDialogFragment() {
             mainViewModel.saveFilterStatus(pastDue = false, upcoming = false,allTasks= true)
             mainViewModel.initData()
 
-            binding.upcomingIcon.setImageResource(R.drawable.ic_gray_checked)
-            binding.pastDueIcon.setImageResource(R.drawable.ic_gray_checked)
-            binding.clearFilterIcon.setImageResource(R.drawable.ic_green_checked)
+            viewModel.checkPreferences()
         }
     }
 }

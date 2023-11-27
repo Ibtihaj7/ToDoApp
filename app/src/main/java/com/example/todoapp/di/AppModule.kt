@@ -51,13 +51,10 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideDataStore(
-        @ApplicationContext context: Context,
-    ): DataStore<Preferences> {
-
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
         val datastore = PreferenceDataStoreFactory.create(
             migrations = listOf(
-                SharedPreferencesMigration(context,DATASTORE_NAME)
+                SharedPreferencesMigration(context, DATASTORE_NAME)
             ),
             scope = CoroutineScope(Dispatchers.Default)
         ) {
