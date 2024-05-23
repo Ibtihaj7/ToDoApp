@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ToDoApp</string>
+    <string name="hello_blank_fragment">مرحبا بك</string>
+    <string name="all_tasks_bottom_bar">كل</string>
+    <string name="completed_tasks_bottom_bar">منتهي</string>
+    <string name="search">بحث</string>
+    <string name="filter_button_title">فلترة</string>
+    <string name="task_title_hint">عنوان المهمة</string>
+    <string name="task_description_hint">وصف المهمة</string>
+    <string name="task_due_date_hint">تاريخ</string>
+    <string name="urgent_checkbox_text">مهم</string>
+    <string name="complete_checkbox_text">تم الانتهاء منه</string>
+    <string name="delete_button_title">حذف</string>
+    <string name="completed_tasks_fragment_title">المهام المنتهية</string>
+    <string name="fab_content_desc">اضافة مهمة جديدة</string>
+    <string name="title_hint">عنوان</string>
+    <string name="description_hint">وصف</string>
+    <string name="mark_as_urgent">ضع علامة كمستعجل</string>
+    <string name="select_date">"اختر التاريخ:"</string>
+    <string name="due_date_error">يرجى اختيار تاريخ استحقاق</string>
+    <string name="add_task_button">إضافة مهمة</string>
+    <string name="date_picker_text">١ يناير ٢٠٢٠</string>
+    <string name="complete_button_title">تعيين كمنتهي</string>
+    <string name="completed_task_toolbar_title">المهمات المنتهية</string>
+    <string name="confirmation_title">هل أنت متأكد؟</string>
+    <string name="confirmation_message">هل انت متاكد انك تريد حذف المهمة؟</string>
+    <string name="cancel">إلغاء</string>
+    <string name="decline">رفض</string>
+    <string name="accept">قبول</string>
+    <string name="no_results_found">لا يوجد نتائج</string>
+    <string name="no_items_to_display">لا يوجد عناصر لعرضها</string>
+    <string name="error_title_required">العنوان مطلوب</string>
+    <string name="error_description_required">الوصف مطلوب</string>
+    <string name="successfully_task_added">تمت إضافة المهمة بنجاح</string>
+    <string name="filter_by_text">فلترة بواسطة</string>
+    <string name="upcoming_text">اقترب موعد استحقاقها</string>
+    <string name="past_due_text">فات موعد استحقاقها</string>
+    <string name="all_tasks_text">كل المهمات</string>
+    <string name="successfully_task_deleted">تم حذف المهمة بنجاح</string>
+    <string name="successfully_task_completed">تم تعيين المهمة كمكتملة</string>
+    <string name="task_type_argent">عاجل</string>
+    <string name="task_type_others">أخرى</string>
+</resources>
