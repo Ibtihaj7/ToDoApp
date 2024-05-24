@@ -1,7 +1,7 @@
 # ToDoApp
 A streamlined and intuitive ToDo application designed for efficient task management. Features dual tabs for all tasks and completed items, with robust search and filtering capabilities for upcoming, past due, and all tasks.
 
-## Screenshots and Video
+## Screenshots
 <img width="326" alt="Screenshot 2024-05-23 at 20 47 02" src="https://github.com/Ibtihaj7/ToDoApp/assets/92644947/c62324a1-f528-4c46-8325-d8f67d273606">
 <img width="328" alt="Screenshot 2024-05-23 at 20 47 23" src="https://github.com/Ibtihaj7/ToDoApp/assets/92644947/dc515c08-432d-4cb2-a0bd-63cff3d6fb04">
 <img width="336" alt="Screenshot 2024-05-23 at 20 48 56" src="https://github.com/Ibtihaj7/ToDoApp/assets/92644947/de0627a8-de53-425c-8ae2-a243fed40be8">
